@@ -1,20 +1,23 @@
 import json
 from dbOperators import *
-from tools import *
+from tools import Tools
+
+# create tools
+tools = Tools()
 
 # load jsons
-rDB = get_config("./data/resturant_database.json")
-mDB = get_config("./data/menu_database.json")
+rDB = tools.get_config("./data/restaurant_database.json")
+mDB = tools.get_config("./data/menu_database.json")
 
-# resturant infomation
+# restaurant infomation
 for rInfo in rDB:
-    rOpt = resturantOperator()
-    rOpt.insertResturantItem(resturantName=rInfo["resturantName"],
+    rOpt = restaurantOperator()
+    rOpt.insertRestaurantItem(restaurantName=rInfo["restaurantName"],
         password=rInfo["password"],
         phone=rInfo["phone"],
         email=rInfo["email"])
-    tOpt = tableOperator(resturantName=rInfo["resturantName"], password=rInfo["password"])
-    qrOpt = QRlinkOperator(resturantName=rInfo["resturantName"], password=rInfo["password"])
+    tOpt = tableOperator(restaurantName=rInfo["restaurantName"], password=rInfo["password"])
+    qrOpt = QRlinkOperator(restaurantName=rInfo["restaurantName"], password=rInfo["password"])
     for tInfo in rInfo["table"]:
         # table
         tOpt.insertTableItem(tableNumber=tInfo["tableNumber"])
@@ -23,14 +26,16 @@ for rInfo in rDB:
 
 # menu infomation
 for mInfo in mDB:
-    rOpt = resturantOperator()
-    rOpt.manageResturantTable(resturantName="TINYHIPPO", password="123456")
-    resturantID = rOpt.selectResturantIDWithName("TINYHIPPO")
+    rOpt = restaurantOperator()
+    rOpt.manageRestaurantTable(restaurantName="TINYHIPPO", password="123456")
+    _, result = selectOperator(tableName="Restaurant", restaurantName="TINYHIPPO", result=["restaurantID"])
+    restaurantID = result[0]["restaurantID"]
     # dishType
-    dtOpt = dishTypeOperator(resturantName="TINYHIPPO", password="123456")
+    dtOpt = dishTypeOperator(restaurantName="TINYHIPPO", password="123456")
     dtOpt.insertDishTypeItem(dishTypeName=mInfo["name"])
-    dishTypeID = dtOpt.selectDishTypeIDWithName(dishTypeName=mInfo["name"], resturantID=resturantID)
+    _, result = selectOperator(tableName="DishType", dishTypeName=mInfo["name"], restaurantID=restaurantID, result=["dishTypeID"])
+    dishTypeID = result[0]["dishTypeID"]
     # dish
-    dOpt = dishOperator(resturantName="TINYHIPPO", password="123456")
+    dOpt = dishOperator(restaurantName="TINYHIPPO", password="123456")
     for dInfo in mInfo["foods"]:
         dOpt.insertDishItem(dishName=dInfo["name"], dishDescription=dInfo["description"], price=dInfo["price"], dishImageURL=dInfo["image_url"], dishTypeID=dishTypeID)

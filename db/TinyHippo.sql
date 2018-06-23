@@ -18,34 +18,35 @@ CREATE SCHEMA IF NOT EXISTS `TINYHIPPO` DEFAULT CHARACTER SET utf8 ;
 USE `TINYHIPPO` ;
 
 -- -----------------------------------------------------
--- Table `TINYHIPPO`.`Resturant`
+-- Table `TINYHIPPO`.`Restaurant`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`Resturant` (
-  `resturantID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `resturantName` VARCHAR(50) NOT NULL,
+CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`Restaurant` (
+  `restaurantID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `restaurantName` VARCHAR(50) NOT NULL,
   `password` VARCHAR(45) NOT NULL,
   `phone` VARCHAR(45) NOT NULL,
   `email` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`resturantID`),
-  UNIQUE INDEX `resturantID_UNIQUE` (`resturantID` ASC),
-  UNIQUE INDEX `resturantName_UNIQUE` (`resturantName` ASC));
+  PRIMARY KEY (`restaurantID`),
+  UNIQUE INDEX `restaurantID_UNIQUE` (`restaurantID` ASC),
+  UNIQUE INDEX `restaurantName_UNIQUE` (`restaurantName` ASC),
+  UNIQUE INDEX `phone_UNIQUE` (`phone` ASC),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC));
 
 
 -- -----------------------------------------------------
--- Table `TINYHIPPO`.`ResturantTable`
+-- Table `TINYHIPPO`.`RestaurantTable`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`ResturantTable` (
+CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`RestaurantTable` (
   `tableID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tableNumber` INT UNSIGNED NOT NULL,
   `currentOrderNumber` INT NOT NULL,
-  `resturantID` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`tableID`, `resturantID`),
-  UNIQUE INDEX `tableNumber_UNIQUE` (`tableNumber` ASC),
+  `restaurantID` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`tableID`, `restaurantID`),
   UNIQUE INDEX `tableID_UNIQUE` (`tableID` ASC),
-  INDEX `fk_Table_Resturant1_idx` (`resturantID` ASC),
-  CONSTRAINT `fk_Table_Resturant1`
-    FOREIGN KEY (`resturantID`)
-    REFERENCES `TINYHIPPO`.`Resturant` (`resturantID`)
+  INDEX `fk_Table_Restaurant1_idx` (`restaurantID` ASC),
+  CONSTRAINT `fk_Table_Restaurant1`
+    FOREIGN KEY (`restaurantID`)
+    REFERENCES `TINYHIPPO`.`Restaurant` (`restaurantID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
@@ -56,18 +57,26 @@ CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`ResturantTable` (
 CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`OrderList` (
   `orderID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `orderNumber` INT NOT NULL,
-  `orderDetail` VARCHAR(500) NOT NULL,
+  `orderDetail` VARCHAR(5000) NOT NULL,
   `total` FLOAT NOT NULL,
   `isPaid` VARCHAR(10) NOT NULL,
-  `editedTime` DATE NOT NULL,
+  `status` VARCHAR(10) NOT NULL,
+  `editedTime` DATETIME NOT NULL,
   `customerID` VARCHAR(45) NOT NULL,
   `tableID` INT UNSIGNED NOT NULL,
+  `restaurantID` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`orderID`, `tableID`),
   UNIQUE INDEX `orderID_UNIQUE` (`orderID` ASC),
   INDEX `fk_OrderList_Table1_idx` (`tableID` ASC),
+  INDEX `fk_OrderList_Restaurant1_idx` (`restaurantID` ASC),
   CONSTRAINT `fk_OrderList_Table1`
     FOREIGN KEY (`tableID`)
-    REFERENCES `TINYHIPPO`.`ResturantTable` (`tableID`)
+    REFERENCES `TINYHIPPO`.`RestaurantTable` (`tableID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_OrderList_Restaurant1`
+    FOREIGN KEY (`restaurantID`)
+    REFERENCES `TINYHIPPO`.`Restaurant` (`restaurantID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
@@ -81,10 +90,11 @@ CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`QRlink` (
   `tableID` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`linkID`, `tableID`),
   UNIQUE INDEX `linkID_UNIQUE` (`linkID` ASC),
-  INDEX `fk_QRlink_ResturantTable1_idx` (`tableID` ASC),
-  CONSTRAINT `fk_QRlink_ResturantTable1`
+  UNIQUE INDEX `tableID_UNIQUE` (`tableID` ASC),
+  INDEX `fk_QRlink_RestaurantTable1_idx` (`tableID` ASC),
+  CONSTRAINT `fk_QRlink_RestaurantTable1`
     FOREIGN KEY (`tableID`)
-    REFERENCES `TINYHIPPO`.`ResturantTable` (`tableID`)
+    REFERENCES `TINYHIPPO`.`RestaurantTable` (`tableID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
@@ -95,13 +105,13 @@ CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`QRlink` (
 CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`DishType` (
   `dishTypeID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `dishTypeName` VARCHAR(255) NOT NULL,
-  `resturantID` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`dishTypeID`, `resturantID`),
+  `restaurantID` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`dishTypeID`, `restaurantID`),
   UNIQUE INDEX `dishTypeID_UNIQUE` (`dishTypeID` ASC),
-  INDEX `fk_DishType_Resturant1_idx` (`resturantID` ASC),
-  CONSTRAINT `fk_DishType_Resturant1`
-    FOREIGN KEY (`resturantID`)
-    REFERENCES `TINYHIPPO`.`Resturant` (`resturantID`)
+  INDEX `fk_DishType_Restaurant1_idx` (`restaurantID` ASC),
+  CONSTRAINT `fk_DishType_Restaurant1`
+    FOREIGN KEY (`restaurantID`)
+    REFERENCES `TINYHIPPO`.`Restaurant` (`restaurantID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
@@ -118,15 +128,15 @@ CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`Dish` (
   `dishImageURL` VARCHAR(255) NOT NULL,
   `dishHot` TINYINT UNSIGNED NOT NULL,
   `monthlySales` INT UNSIGNED NOT NULL,
-  `resturantID` INT UNSIGNED NOT NULL,
+  `restaurantID` INT UNSIGNED NOT NULL,
   `dishTypeID` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`dishID`, `resturantID`, `dishTypeID`),
+  PRIMARY KEY (`dishID`, `restaurantID`, `dishTypeID`),
   UNIQUE INDEX `dishID_UNIQUE` (`dishID` ASC),
-  INDEX `fk_Dish_Resturant1_idx` (`resturantID` ASC),
+  INDEX `fk_Dish_Restaurant1_idx` (`restaurantID` ASC),
   INDEX `fk_Dish_DishType1_idx` (`dishTypeID` ASC),
-  CONSTRAINT `fk_Dish_Resturant1`
-    FOREIGN KEY (`resturantID`)
-    REFERENCES `TINYHIPPO`.`Resturant` (`resturantID`)
+  CONSTRAINT `fk_Dish_Restaurant1`
+    FOREIGN KEY (`restaurantID`)
+    REFERENCES `TINYHIPPO`.`Restaurant` (`restaurantID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Dish_DishType1`
@@ -140,13 +150,14 @@ CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`Dish` (
 -- Table `TINYHIPPO`.`DishComment`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`DishComment` (
-  `dishCommentID` INT NOT NULL,
+  `dishCommentID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `comment` VARCHAR(255) NOT NULL,
-  `Dish_dishID` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`dishCommentID`, `Dish_dishID`),
-  INDEX `fk_DishComment_Dish1_idx` (`Dish_dishID` ASC),
+  `dishID` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`dishCommentID`, `dishID`),
+  UNIQUE INDEX `dishCommentID_UNIQUE` (`dishCommentID` ASC),
+  INDEX `fk_DishComment_Dish1_idx` (`dishID` ASC),
   CONSTRAINT `fk_DishComment_Dish1`
-    FOREIGN KEY (`Dish_dishID`)
+    FOREIGN KEY (`dishID`)
     REFERENCES `TINYHIPPO`.`Dish` (`dishID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
@@ -160,8 +171,15 @@ CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`Recommendation` (
   `title` VARCHAR(45) NOT NULL,
   `tag` VARCHAR(45) NOT NULL,
   `imageURL` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`recommendationID`),
-  UNIQUE INDEX `recommendationID_UNIQUE` (`recommendationID` ASC));
+  `editedTime` DATETIME NOT NULL,
+  `restaurantID` INT UNSIGNED NOT NULL,
+  INDEX `fk_Recommendation_Restaurant1_idx` (`restaurantID` ASC),
+  PRIMARY KEY (`recommendationID`, `restaurantID`),
+  CONSTRAINT `fk_Recommendation_Restaurant1`
+    FOREIGN KEY (`restaurantID`)
+    REFERENCES `TINYHIPPO`.`Restaurant` (`restaurantID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
 
 
 -- -----------------------------------------------------
@@ -169,11 +187,8 @@ CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`Recommendation` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`RecommendationDetails` (
   `recommendationID` INT UNSIGNED NOT NULL,
-  `dishID` INT NOT NULL,
-  `description` VARCHAR(255) NOT NULL,
-  `resturantID` INT NOT NULL,
-  PRIMARY KEY (`recommendationID`, `dishID`, `resturantID`),
-  INDEX `fk_Recommendation_has_Dish_Dish1_idx` (`dishID` ASC, `resturantID` ASC),
+  `dishID` INT UNSIGNED NOT NULL,
+  `description` VARCHAR(5000) NOT NULL,
   INDEX `fk_Recommendation_has_Dish_Recommendation1_idx` (`recommendationID` ASC),
   CONSTRAINT `fk_Recommendation_has_Dish_Recommendation1`
     FOREIGN KEY (`recommendationID`)
@@ -181,8 +196,8 @@ CREATE TABLE IF NOT EXISTS `TINYHIPPO`.`RecommendationDetails` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Recommendation_has_Dish_Dish1`
-    FOREIGN KEY (`dishID` , `resturantID`)
-    REFERENCES `TINYHIPPO`.`Dish` (`dishID` , `resturantID`)
+    FOREIGN KEY (`dishID`)
+    REFERENCES `TINYHIPPO`.`Dish` (`dishID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
