@@ -747,6 +747,25 @@ def selectOperator(tableName, **kwargs):
     result = tools.getResults(sql, keys=kwargs["result"])
     return True, result
 
+def selectUniqueItem(tableName, **kwargs):
+    '''
+    Input:
+        tableName: the name of the table
+        **kwargs: key-value of table
+    Output:
+        the status of selection
+        the result for the selection
+    '''
+    if len(kwargs["result"]) != 1:
+        print("[FAILED] The number of 'result' is not one.")
+        return False, ''
+    key = kwargs["result"][0]
+    status, result = selectOperator(tableName=tableName, **kwargs)
+    unique = ''
+    if len(result) == 1:
+        unique = result[0][key]
+    return status, unique
+
 def updateOperator(rstName, pwd, tableName, **kwargs):
     '''
     Input:

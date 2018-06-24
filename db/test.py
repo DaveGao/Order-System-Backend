@@ -17,6 +17,7 @@ rOpt.insertRestaurantItem(restaurantName='rName2', password='123456', phone='102
 # select
 print( selectOperator(tableName="Restaurants", restaurantName='rName1', result=["restaurantID"]) )
 print( selectOperator(tableName="Restaurant", restaurantName='rName1', result=["restaurantIDs"]) )
+print( selectUniqueItem(tableName="Restaurant", restaurantName='rName3', result=["restaurantID"]) )
 print( selectOperator(tableName="Restaurant", restaurantName='rName1', result=["restaurantID"]) )
 print( selectOperator(tableName="Restaurant", restaurantName='rName1', phone='10293847567', result=["restaurantID", "email"]))
 print( selectOperator(tableName="Restaurant", restaurantName='rName3', result=["restaurantID"]) )
