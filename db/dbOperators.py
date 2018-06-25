@@ -615,7 +615,7 @@ class orderListOperator:
 ## -----------------------------------------------------
 ## Table `TINYHIPPO`.`Recommendation`
 ## -----------------------------------------------------
-class recommendationOperator:
+class RecommendationOperator:
     def __init__(self, restaurantName=None, password=None):
         self.restaurantID = None
         self.hasSignedIn = False
@@ -678,17 +678,17 @@ class RecommendationDetailsOperator:
         if identifyOperator(tableName="Recommendation", recommendationID=recommendationID):
             if identifyOperator(tableName="Dish", dishID=dishID):
                 # check whether recommendationID and dishID are from same restaurant
-                _, result = selectOperator(tableName="Recommendation", recommendationID=recommendationID, result=["restaurantID"])
-                restaurantID1 = result[0]["restaurantID"]
-                _, result = selectOperator(tableName="Dish", dishID=dishID, result=["restaurantID"])
-                restaurantID2 = result[0]["restaurantID"]
+                restaurantID1 = selectUniqueItem(tableName="Recommendation", recommendationID=recommendationID, result=["restaurantID"])
+                restaurantID2 = selectUniqueItem(tableName="Dish", dishID=dishID, result=["restaurantID"])
                 if restaurantID1 != restaurantID2:
                     print("[FAILED] The recommendationID '%d' and the dishID '%d' are not from same restaurant." % (recommendationID, dishID))
                     return False
+                dishName = selectUniqueItem(tableName="Dish", dishID=dishID, result=["dishName"])
+                title = selectUniqueItem(tableName="Recommendation", recommendationID=recommendationID, result=["title"])
                 sql = """INSERT INTO RecommendationDetails(recommendationID, dishID, description)
                            VALUES (%d, %d, "%s");""" % (recommendationID, dishID, description)
                 tools.executeSQL(sql)
-                print("[SUCCESS] A new relationship between Table 'Dish' and Table 'Recommendation' created.")
+                print("[SUCCESS] A new relationship between Dish '%s' and Recommendation title '%s' created." % (dishName, title))
                 return True
             else:
                 print("[FAILED] dishID '%d' is not existed." % dishID)
@@ -758,13 +758,13 @@ def selectUniqueItem(tableName, **kwargs):
     '''
     if len(kwargs["result"]) != 1:
         print("[FAILED] The number of 'result' is not one.")
-        return False, ''
+        return ''
     key = kwargs["result"][0]
-    status, result = selectOperator(tableName=tableName, **kwargs)
+    _, result = selectOperator(tableName=tableName, **kwargs)
     unique = ''
     if len(result) == 1:
         unique = result[0][key]
-    return status, unique
+    return unique
 
 def updateOperator(rstName, pwd, tableName, **kwargs):
     '''

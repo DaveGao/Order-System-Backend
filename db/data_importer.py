@@ -8,13 +8,14 @@ tools = Tools()
 # load jsons
 rDB = tools.get_config("./data/restaurant_database.json")
 mDB = tools.get_config("./data/menu_database.json")
+rcDB = tools.get_config("./data/recommendation.json")
 
 # restaurant infomation
 for rInfo in rDB:
     rOpt = restaurantOperator()
     rOpt.insertRestaurantItem(restaurantName=rInfo["restaurantName"],
         password=rInfo["password"],
-        phone=rInfo["phone"],
+        phone=rInfo["phone"], 
         email=rInfo["email"])
     tOpt = tableOperator(restaurantName=rInfo["restaurantName"], password=rInfo["password"])
     qrOpt = QRlinkOperator(restaurantName=rInfo["restaurantName"], password=rInfo["password"])
@@ -38,4 +39,15 @@ for mInfo in mDB:
     # dish
     dOpt = dishOperator(restaurantName="TINYHIPPO", password="123456")
     for dInfo in mInfo["foods"]:
-        dOpt.insertDishItem(dishName=dInfo["name"], dishDescription=dInfo["description"], price=dInfo["price"], dishImageURL=dInfo["image_url"], dishTypeID=dishTypeID)
+        dOpt.insertDishItem(dishName=dInfo["name"], dishDescription=dInfo["description"], 
+                price=dInfo["price"], dishImageURL=dInfo["image_url"], dishTypeID=dishTypeID)
+
+rcOpt = RecommendationOperator()
+rcOpt.manageRecommendationTable(restaurantName="TINYHIPPO", password="123456")
+rcdOpt = RecommendationDetailsOperator()
+# print(rcDB)   
+for rcInfo in rcDB["data"]:  
+    rcOpt.insertRecommendationItem(title=rcInfo['title'], tag=rcInfo['tag'], imageURL=rcInfo['image'])
+    rcid = selectUniqueItem(tableName="Recommendation", restaurantID=1, title=rcInfo['title'], result=["recommendationID"])
+    for obj in rcInfo['details']:
+        rcdOpt.insertRecommendationDetailsItem(recommendationID=rcid, dishID=obj["dish_id"], description=obj["description"])
